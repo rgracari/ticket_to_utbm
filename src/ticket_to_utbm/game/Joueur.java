@@ -1,6 +1,6 @@
 package ticket_to_utbm.game;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -253,8 +253,8 @@ public class Joueur {
 	 * @return Si le cursus a été accompli
 	 */
 	public boolean cursusAccompli(Cursus carte) {
-		ArrayList<Chemin> chemins = new ArrayList<Chemin>(m_chemins);
-		ArrayList<UV> passe = new ArrayList<UV>();
+		HashSet<Chemin> chemins = new HashSet<Chemin>(m_chemins);
+		HashSet<UV> passe = new HashSet<UV>();
 		return routeExiste(chemins, passe, carte.uv1(), carte.uv2());
 	}
 	
@@ -266,10 +266,9 @@ public class Joueur {
 	 * @param arrivee But à atteindre par la route depuis le départ
 	 * @return Si la route existe
 	 */
-	private boolean routeExiste(List<Chemin> chemins, List<UV> passe, UV depart, UV arrivee) {
+	private boolean routeExiste(HashSet<Chemin> chemins, HashSet<UV> passe, UV depart, UV arrivee) {
 		// Recherche relativement standard dans un arbre
-		for (int i = 0; i < chemins.size(); i++) {
-			Chemin chemin = chemins.get(i);
+		for (Chemin chemin: chemins) {
 			UV suivant = null;
 			if ((chemin.uv1() == arrivee && chemin.uv2() == depart) || (chemin.uv1() == depart && chemin.uv2() == arrivee)) {
 				return true;  // Le chemin va directement du départ à l'arrivée, donc la route existe
@@ -283,9 +282,9 @@ public class Joueur {
 			// donc on peut potentiellement continuer la route de celui-ci
 			if (suivant != null) {
 				// On continue la recherche sans ce chemin (inutile de pouvoir repasser deux fois par le même, et ça ferait des boucles infinies)
-				ArrayList<Chemin> subchemins = new ArrayList<Chemin>(chemins);
-				subchemins.remove(i);
-				ArrayList<UV> subpasse = new ArrayList<UV>(passe);
+				HashSet<Chemin> subchemins = new HashSet<Chemin>(chemins);
+				subchemins.remove(chemin);
+				HashSet<UV> subpasse = new HashSet<UV>(passe);
 				subpasse.add(depart);
 				
 				// On continue la recherche récursivement, en donnant le bout du chemin (supposément plus près) et l'arrivée souhaitée.
