@@ -53,7 +53,7 @@ public class Game {
 	/**
 	* @brief      Initialise les joueurs et les cartes visibles
 	* @details    Cette méthode permet de choisir le nombre de joueur, chaque nom et chaque couleur.
-	* 			  Elle permet aussi de réveller les 5 cartes visibles de la pioche.
+	* 	      Elle permet aussi de réveller les 5 cartes visibles de la pioche.
 	*/
 	public void init()
 	{
@@ -190,7 +190,7 @@ public class Game {
 	/**
 	* @brief      Permet de trouver quel joueur à la chemin le plus long
 	* @details    Utilisation d'un algorithme de recherche en profondeur qui détermine quel joueur a mis le plus d'ECTS
-	* 			  bout à bout afin de créer le chemin le plus long.
+	* 	      bout à bout afin de créer le chemin le plus long.
 	* @return     Un \e Joueur qui est celui qui remporte le point bonus.
 	*/
 	public Joueur cheminLePlusLong()
