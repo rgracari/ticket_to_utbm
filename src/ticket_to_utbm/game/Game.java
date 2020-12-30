@@ -2,6 +2,7 @@ package ticket_to_utbm.game;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
 
 /**
@@ -61,10 +62,11 @@ public class Game {
 		// idée : bouton à cocher : 2 o   3 o   4 o  5 o
 		// but : sécuriser le nombre de joueur : 1 < j < 6
 		
+		int nb;
 		try ( Scanner scanner = new Scanner( System.in ) ) 
 		{
 			System.out.print("Nombre de joueur : ");
-            int nb = scanner.nextInt();
+            nb = scanner.nextInt();
 		}
 		
 		for (int i = 0 ; i < nb ; i++)
@@ -76,16 +78,16 @@ public class Game {
 	            
 	            System.out.print("Couleur du joueur : ");
 	            String couleur = scanner.nextLine();
+	            
+	            Joueur j = new Joueur(nom, couleur);
+				m_listeJoueur.add(j);
 			}
-			
-			Joueur j = new Joueur(nom, couleur);
-			m_listeJoueur.add(j);
 		}
 		
 		// /!\ bug /!\à vérifier : la sortie de piocher est une liste et ici tableau
 		for (int j = 0 ; j < 5 ; j++)
 		{
-			m_creditVisible[j] = m_piocheCredit.piocher(1);  
+			m_creditVisible[j] = m_piocheCredit.piocher();  
 		}
 	}
 	
@@ -127,7 +129,7 @@ public class Game {
 			}
 			
 			// /!\ bug /!\ à vérifier : les cartes visibles sont un tableau et on l'ajoute dans une liste
-			cartes.add(m_creditVisible[num]);
+			cartes.add(m_creditVisible[nombre]);
 			joueur.ajouterCredits(cartes);
 		}
 		
@@ -145,7 +147,7 @@ public class Game {
 	public void defausserCredit(Credit credit, Joueur joueur)
 	{
 		//point à vérifier : retirerCredits renvoi une liste de cartes Credits 
-		joueur.retierCredits(credit, 1);
+		joueur.retirerCredits(credit, 1);
 		m_piocheCredit.defausser(credit);
 	}
 	
@@ -195,7 +197,21 @@ public class Game {
 	*/
 	public Joueur cheminLePlusLong()
 	{
-		//algorithme de recherche en profondeur que je ne métrise pas ...
+		int maxi = 0;
+		Joueur proprietaire = null;
+		for (Joueur joueur : m_listeJoueur) {
+			HashSet<Chemin> passe = new HashSet<Chemin>();
+			int maxjoueur = cheminLePlusLong(joueur, passe);
+			if (maxjoueur > maxi) {
+				proprietaire = joueur;
+				maxi = maxjoueur;
+			}
+		}
+		return proprietaire;
+	}
+	
+	private int cheminLePlusLong(Joueur joueur, HashSet<Chemin> passe) {
+		// TODO ?
 	}
 
 }
