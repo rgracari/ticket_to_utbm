@@ -9,5 +9,5 @@ public enum UV {  // 36 gares sur le plaeau US
 	LE01, LE02, LE03, LE05, 
 	LE07, DR01, DR02, GE07, 
 	SP03, SP07, HE05, HE09,
-	AAAA, BBBB, CCCC, DDDD,  // TODO : Trouver des UV
+	HT01, PH02, EC02, ST40,
 }
