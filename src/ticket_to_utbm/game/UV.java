@@ -1,6 +1,6 @@
 package ticket_to_utbm.game;
 
-public enum UV {  // 36 gares sur le plaeau US
+public enum UV {  // 36 gares sur le plateau US
 	IT40, IT41, IT42, IT43,
 	IT44, IT45, AP4A, IA41,
 	RE4E, SI40, SY40, PC40,

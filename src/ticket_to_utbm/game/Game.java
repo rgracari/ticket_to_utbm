@@ -2,7 +2,6 @@ package ticket_to_utbm.game;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * @file     Game.java
@@ -11,7 +10,7 @@ import java.util.HashSet;
  * 
  * @brief    Classe qui gère l'ensemble du jeu.
  *
- * @details  Cette classe va initialiser le nombre de joueur, les 2 pioches dont chaque joueur aura accès, 
+ * @details  Cette classe va initialiser le nombre de joueurs, les 2 pioches dont chaque joueur aura accès, 
  *           mais aussi les crédits de couleurs et le plateau qu'il pourra visualisé par la suite. Elle est 
  *           principalement axées sur les actions que va pouvoir faire chaque joueur à chaque tour. 
  */
@@ -19,19 +18,19 @@ import java.util.HashSet;
 public class Game {
 	
 	// m_listeJoueur : contient la liste de tous les joueurs participants
-	List<Joueur> m_listeJoueur;
+	private List<Joueur> m_listeJoueur;
 	
 	// m_piocheCursus : représente la pioche des Cursus (aka les destinations ou objectifs)
-	PiocheCursus m_piocheCursus;
+	private PiocheCursus m_piocheCursus;
 	
 	// m_piocheCredit : repésente la pioche des Credits (aka les wagons)
-	PiocheCredit m_piocheCredit;
+	private PiocheCredit m_piocheCredit;
 	
 	// m_creditVisible : est un tableau de 5 cases avec les 5 cartes visibles de la pioche 
-	Credit[] m_creditVisible;
+	private Credit[] m_creditVisible;
 	
 	// m_plateau : représente le plateau sur lequel les joueurs jouent
-	Plateau m_plateau;
+	private Plateau m_plateau;
 	
 
 	/**
@@ -92,7 +91,6 @@ public class Game {
 		List<Credit> cartes = new ArrayList<Credit>();
 		cartes = m_piocheCredit.piocher(nombre);
 		joueur.ajouterCredits(cartes);
-		
 	}
 	
 	
@@ -175,8 +173,7 @@ public class Game {
 		int maxi = 0;
 		Joueur proprietaire = null;
 		for (Joueur joueur : m_listeJoueur) {
-			HashSet<Chemin> passe = new HashSet<Chemin>();
-			int maxjoueur = cheminLePlusLong(joueur, passe);
+			int maxjoueur = cheminLePlusLong(joueur);
 			if (maxjoueur > maxi) {
 				proprietaire = joueur;
 				maxi = maxjoueur;
@@ -185,8 +182,45 @@ public class Game {
 		return proprietaire;
 	}
 	
-	private int cheminLePlusLong(Joueur joueur, HashSet<Chemin> passe) {
-		// TODO ?
+	private int cheminLePlusLong(Joueur joueur) {
+		ArrayList<Chemin> chemins = joueur.chemins();
+		
+		// Construction de la matrice d'adjacence
+		int[][] adjacence = new int[chemins.size()][chemins.size()];
+		for (int i = 0; i < chemins.size(); i++) {  // Initialisation avec des -inf
+			adjacence[i][i] = 0;
+			for (int j = i+1; j < chemins.size(); j++) {
+				// Le graphe n'est pas orienté, donc on peut faire ce genre de réductions avec j partant de i+1
+				// et affecter Mij et Mji en même temps vu que M est symétrique
+				adjacence[i][j] = adjacence[j][i] = Integer.MIN_VALUE;
+			}
+		}
+		for (Chemin chemin : chemins) {  // Ajout des valeurs de la matrice d'adjacences
+			adjacence[chemin.uv1().ordinal()][chemin.uv2().ordinal()] = chemin.longueur();
+			adjacence[chemin.uv2().ordinal()][chemin.uv1().ordinal()] = chemin.longueur();
+		}
+		
+		// Floyd-Warshall à l'envers, en prenant le max au lieu du min
+		// Trouve le plus long chemin entre chaque paire de sommets
+		for (int k = 0; k < chemins.size(); k++) {
+			for (int i = 0; i < chemins.size(); i++) {
+				for (int j = i+1; j < chemins.size(); j++){
+					adjacence[i][j] = adjacence[j][i] = Math.max(adjacence[i][j], adjacence[i][k] + adjacence[k][j]);
+				}
+			}
+		}
+		
+		// Récupération de la valeur maximale dans tous les chemins trouvés
+		int longueurmax = -Integer.MIN_VALUE;
+		for (int i = 0; i < chemins.size(); i++) {
+			for (int j = i+1; j < chemins.size(); j++) {
+				if (adjacence[i][j] > longueurmax) {
+					longueurmax = adjacence[i][j];
+				}
+			}
+		}
+		
+		return longueurmax;
 	}
 
 }

@@ -10,12 +10,12 @@ import java.util.NoSuchElementException;
  * @author Grégori MIGNEROT
  */
 public class Joueur {
-	private String m_name;
-	private CouleurJoueur m_couleur;
-	private ArrayList<Credit> m_credits;
-	private ArrayList<Cursus> m_cursus;
-	private ArrayList<Chemin> m_chemins;
-	private int m_ects;
+	private String m_name;                // Nom du joueur
+	private CouleurJoueur m_couleur;      // Couleur des pions du joueur
+	private ArrayList<Credit> m_credits;  // Main du joueur
+	private ArrayList<Cursus> m_cursus;   // Cartes cursus prises
+	private ArrayList<Chemin> m_chemins;  // Chemins pris
+	private int m_ects;                   // Nombre de pions ECTS (aka pions wagons) restants
 	
 	/**
 	 * Initialise le joueur
@@ -163,6 +163,7 @@ public class Joueur {
 	public ArrayList<Credit> retirerCredits(Credit couleur, int nombre) throws NoSuchElementException {
 		// On doit vérifier s'il y a bien le nombre de cartes avant de commencer à les extraire, donc on récupère leur indice
 		ArrayList<Integer> indices = new ArrayList<Integer>(nombre);
+		
 		// On itère dans l'ordre inverse pour pouvoir les retirer facilement de la liste plus tard
 		for (int i = m_credits.size() - 1; (i >= 0 && indices.size() < nombre); i++) {
 			if (m_credits.get(i) == couleur) {
@@ -248,7 +249,7 @@ public class Joueur {
 	}
 	
 	/**
-	 * Vérifie si un cursus donnée a été accompli par le joueur
+	 * Vérifie si un cursus donné a été accompli par le joueur
 	 * @param carte Cursus à vérifier
 	 * @return Si le cursus a été accompli
 	 */
