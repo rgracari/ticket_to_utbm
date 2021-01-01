@@ -27,7 +27,7 @@ public class PiocheCursus {
 	/**
 	 * Charge les cartes cursus
 	 */
-	private void chargerCartes() {
+	private void chargerCartes() {  // TODO
 		m_cartes = new ArrayList<Cursus>(m_numcartes);
 		m_cartes.add(new Cursus(UV.AP4A, UV.IA41, 10));
 		m_cartes.add(new Cursus(UV.AP4A, UV.IT45, 16));
