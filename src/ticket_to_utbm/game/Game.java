@@ -3,7 +3,6 @@ package ticket_to_utbm.game;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Scanner;
 
 /**
  * @file     Game.java
@@ -46,7 +45,6 @@ public class Game {
 		m_piocheCredit = new PiocheCredit();
 		m_creditVisible = new Credit[5];
 		m_plateau = new Plateau();
-		
 		init();
 	}
 	
@@ -54,41 +52,31 @@ public class Game {
 	/**
 	* @brief      Initialise les joueurs et les cartes visibles
 	* @details    Cette méthode permet de choisir le nombre de joueur, chaque nom et chaque couleur.
-	* 	      Elle permet aussi de réveller les 5 cartes visibles de la pioche.
+	* 	      Elle permet aussi de révèler les 5 cartes visibles de la pioche.
 	*/
 	public void init()
-	{
-		// à modifier lors de la creation de l'interface graphique
-		// idée : bouton à cocher : 2 o   3 o   4 o  5 o
-		// but : sécuriser le nombre de joueur : 1 < j < 6
+	{		
+		m_listeJoueur.clear();
+		m_piocheCursus.init();
+		m_piocheCredit.init();
+		m_plateau.init();
 		
-		int nb;
-		try ( Scanner scanner = new Scanner( System.in ) ) 
-		{
-			System.out.print("Nombre de joueur : ");
-            nb = scanner.nextInt();
-		}
-		
-		for (int i = 0 ; i < nb ; i++)
-		{
-			try ( Scanner scanner = new Scanner( System.in ) ) 
-			{
-				System.out.print("Nom du joueur : ");
-				String nom = scanner.nextLine();
-	            
-	            System.out.print("Couleur du joueur : ");
-	            String couleur = scanner.nextLine();
-	            
-	            Joueur j = new Joueur(nom, couleur);
-				m_listeJoueur.add(j);
-			}
-		}
-		
-		// /!\ bug /!\à vérifier : la sortie de piocher est une liste et ici tableau
 		for (int j = 0 ; j < 5 ; j++)
 		{
 			m_creditVisible[j] = m_piocheCredit.piocher();  
 		}
+	}
+	
+	/**
+	 * Ajoute un joueur au jeu
+	 * @param nom Nom du joueur
+	 * @param couleur Couleur attribuée au joueur
+	 * @return L'objet joueur créé
+	 */
+	public Joueur ajouterJoueur(String nom, CouleurJoueur couleur) {
+		Joueur joueur = new Joueur(nom, couleur);
+		m_listeJoueur.add(joueur);
+		return joueur;
 	}
 	
 	
@@ -116,23 +104,10 @@ public class Game {
 	* @param      nombre         Nombre de cartes visibles piochées : compris entre 1 et 2  
 	* @param      joueur         Le joueur qui fait l'action
 	*/
-	public void piocherCreditVisible(int nombre, Joueur joueur)
+	public void piocherCreditVisible(int indice, Joueur joueur)
 	{
-		List<Credit> cartes = new ArrayList<Credit>();
-		for (int i = 0; i < nombre ; i++)
-		{
-			//changer la méthode avec les couleurs et l'interface graphique 
-			try ( Scanner scanner = new Scanner( System.in ) ) 
-			{
-				System.out.print("Numero de la carte face visible : ");
-				int num = scanner.nextInt();
-			}
-			
-			// /!\ bug /!\ à vérifier : les cartes visibles sont un tableau et on l'ajoute dans une liste
-			cartes.add(m_creditVisible[nombre]);
-			joueur.ajouterCredits(cartes);
-		}
-		
+		joueur.ajouterCredit(m_creditVisible[indice]);
+		m_creditVisible[indice] = m_piocheCredit.piocher();
 	}
 	
 	
