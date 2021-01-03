@@ -16,6 +16,7 @@ import java.util.ArrayList;
  */
 
 public class Game {
+	private final int m_max_huma_visibles = 3;
 	
 	// m_listeJoueur : contient la liste de tous les joueurs participants
 	private List<Joueur> m_listeJoueur;
@@ -78,6 +79,23 @@ public class Game {
 		return joueur;
 	}
 	
+	/**
+	 * Donne une copie de la liste des joueurs, dans l'ordre où ils ont été ajoutés au jeu
+	 * @return Copie de la liste des joueurs
+	 */
+	public ArrayList<Joueur> joueurs(){
+		ArrayList<Joueur> copie = new ArrayList<Joueur>(m_listeJoueur);
+		return copie;
+	}
+	
+	/**
+	 * Donne la carte visible à l'indice i
+	 * @param i Numéro de la carte
+	 * @return Carte visible à l'indice i
+	 */
+	public Credit creditVisible(int i){
+		return m_creditVisible[i];
+	}
 	
 	/**
 	* @brief      Méthode qui permet de prendre une ou plusieurs cartes crédits parmis celle qui sont face cachées
@@ -101,11 +119,30 @@ public class Game {
 	*             une autre action sans rapport avec cette méthode.
 	* @param      nombre         Nombre de cartes visibles piochées : compris entre 1 et 2  
 	* @param      joueur         Le joueur qui fait l'action
+	* @return     true si la carte prise est une humanité, false sinon
 	*/
-	public void piocherCreditVisible(int indice, Joueur joueur)
+	public boolean piocherCreditVisible(int indice, Joueur joueur)
 	{
+		boolean ishuma = m_creditVisible[indice] == Credit.Humanite;
 		joueur.ajouterCredit(m_creditVisible[indice]);
 		m_creditVisible[indice] = m_piocheCredit.piocher();
+		
+		int numhuma = 0;
+		for (int i = 0; i < 5; i++) {
+			if (m_creditVisible[i] == Credit.Humanite) numhuma += 1;
+		}
+		
+		while (numhuma > m_max_huma_visibles) {
+			numhuma = 0;
+			for (int i = 0; i < 5; i++) {
+				m_piocheCredit.defausser(m_creditVisible[i]);
+				m_creditVisible[i] = m_piocheCredit.piocher();
+				if (m_creditVisible[i] == Credit.Humanite) {
+					numhuma += 1;
+				}
+			}
+		}
+		return ishuma;
 	}
 	
 	
@@ -126,14 +163,26 @@ public class Game {
 	
 	
 	/**
-	* @brief      Méthode qui permet de déposer des ECTS et de prendre un chemin 
+	* @brief      Méthode qui permet de déposer des ECTS et de prendre un chemin.
 	* @details    Au cours d'un tour, un joueur peut décider de prendre un chemin et de déposer des ECTS (aka des wagons)
 	*             afin de réussir à terminer ses cartes cursus (aka destinations ou objectifs).
+	*             Les crédits et pions ECTS associés au chemin sont retirés au joueur, mais le chemin doit déjà avoir été retiré du plateau
 	* @param      chemin     Chemin choisi par le joueur 
 	* @param      joueur     Le joueur qui prend le chemin  
 	*/
-	public void prendreChemin(Chemin chemin, Joueur joueur)
-	{
+	public void prendreChemin(Chemin chemin, Joueur joueur) {
+		joueur.retirerCredits(chemin.couleur(), chemin.longueur());
+		joueur.ajouterChemin(chemin);
+	}
+	
+	/**
+	 * Donne un chemin disponible à un joueur, retire le chemin du plateau, et retire les crédits et pions ECTS nécessaires au joueur.
+	 * @param id ID du chemin pris
+	 * @param joueur Joueur qui a pris le chemin
+	 */
+	public void prendreChemin(int id, Joueur joueur) {
+		Chemin chemin = m_plateau.prendre(id);
+		joueur.retirerCredits(chemin.couleur(), chemin.longueur());
 		joueur.ajouterChemin(chemin);
 	}
 	
@@ -144,7 +193,7 @@ public class Game {
 	* @param      nombre     Entier qui représente le nombre de carte que le joueur pioche 
 	* @return     Une \e liste \e de \e cursus représentant la série de cartes piochées.
 	*/
-	public List<Cursus> piocherCursus(int nombre)
+	public ArrayList<Cursus> piocherCursus(int nombre)
 	{
 		return m_piocheCursus.piocher(nombre);
 	}
@@ -159,6 +208,30 @@ public class Game {
 	public void defausserCursus (Cursus cursus)
 	{
 		m_piocheCursus.defausser(cursus);
+	}
+	
+	/**
+	 * Donne la liste des chemins qu'un joueur peut prendre avec sa main actuelle
+	 * @param joueur Joueur concerné
+	 * @return Liste des chemins que le joueur peut prendre en l'état
+	 */
+	public ArrayList<Chemin> cheminsPossibles(Joueur joueur){
+		ArrayList<Chemin> prenables = new ArrayList<Chemin>();
+		for (Chemin chemin : m_plateau.chemins()) {
+			if (joueur.peutPrendre(chemin)) {
+				prenables.add(chemin);
+			}
+		}
+		return prenables;
+	}
+	
+	/**
+	 * Donne si le chemin avec l'ID donné est toujours disponible
+	 * @param id ID à chercher
+	 * @return true si le chemin est disponible, false sinon
+	 */
+	public boolean cheminDisponible(int id) {
+		return m_plateau.disponible(id);
 	}
 	
 	
@@ -182,6 +255,11 @@ public class Game {
 		return proprietaire;
 	}
 	
+	/**
+	 * Trouve le chemin le plus long appartenant au joueur
+	 * @param joueur Joueur concerné
+	 * @return Longueur du plus long chemin trouvé
+	 */
 	private int cheminLePlusLong(Joueur joueur) {
 		ArrayList<Chemin> chemins = joueur.chemins();
 		

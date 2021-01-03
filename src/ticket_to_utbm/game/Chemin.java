@@ -32,7 +32,7 @@ public class Chemin {
 	 * Accesseur pour l'identifiant unique du chemin
 	 * @return Identifiant du chemin
 	 */
-	int id() {
+	public int id() {
 		return m_id;
 	}
 	
@@ -40,7 +40,7 @@ public class Chemin {
 	 * Accesseur pour la première extrémité du chemin
 	 * @return Première UV reliée par le chemin
 	 */
-	UV uv1() {
+	public UV uv1() {
 		return m_uv1;
 	}
 	
@@ -48,7 +48,7 @@ public class Chemin {
 	 * Accesseur pour la seconde extrémité du chemin
 	 * @return Seconde UV reliée par le chemin
 	 */
-	UV uv2() {
+	public UV uv2() {
 		return m_uv2;
 	}
 	
@@ -56,7 +56,7 @@ public class Chemin {
 	 * Accesseur pour la taille du chemin
 	 * @return Longueur du chemin en credits
 	 */
-	int longueur() {
+	public int longueur() {
 		return m_longueur;
 	}
 	
@@ -64,7 +64,7 @@ public class Chemin {
 	 * Accesseur pour la couleur du chemin
 	 * @return Couleur des crédits nécessaires pour prendre le chemin (humanité pour gris)
 	 */
-	Credit couleur(){
+	public Credit couleur(){
 		return m_couleur;
 	}
 	
@@ -72,7 +72,7 @@ public class Chemin {
 	 * Donne les points que rapporte le chemin s'il est pris
 	 * @return Valeur du chemin en points
 	 */
-	int score() {
+	public int score() {
 		return m_scores[m_longueur];
 	}
 }

@@ -1,6 +1,7 @@
 package ticket_to_utbm.game;
 
 import java.util.Hashtable;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 /**
@@ -140,4 +141,23 @@ public class Plateau {
 			return prise;
 		}
 	}
+	
+	/**
+	 * Donne la liste des chemins disponibles
+	 * @return Liste des chemins disponibles
+	 */
+	public ArrayList<Chemin> chemins(){
+		ArrayList<Chemin> copie = new ArrayList<Chemin>(m_chemins.values());
+		return copie;
+	}
+	
+	/**
+	 * Donne si le chemin avec l'id donné est disponible
+	 * @param id ID du chemin à chercher
+	 * @return true si le chemin est disponible, false sinon
+	 */
+	public boolean disponible(int id) {
+		return m_chemins.containsKey(id);
+	}
+	
 }

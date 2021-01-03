@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  * @author Grégori MIGNEROT
  */
 public class Joueur {
-	private String m_name;                // Nom du joueur
+	private String m_nom;                // Nom du joueur
 	private CouleurJoueur m_couleur;      // Couleur des pions du joueur
 	private ArrayList<Credit> m_credits;  // Main du joueur
 	private ArrayList<Cursus> m_cursus;   // Cartes cursus prises
@@ -22,8 +22,8 @@ public class Joueur {
 	 * @param name Nom du joueur
 	 * @param couleur Couleur associée au joueur
 	 */
-	public Joueur(String name, CouleurJoueur couleur) {
-		m_name = name;
+	public Joueur(String nom, CouleurJoueur couleur) {
+		m_nom = nom;
 		m_couleur = couleur;
 		init();
 	}
@@ -42,8 +42,8 @@ public class Joueur {
 	 * Donne le nom du joueur
 	 * @return Nom du joueur
 	 */
-	public String name() {
-		return m_name;
+	public String nom() {
+		return m_nom;
 	}
 	
 	/**
@@ -183,6 +183,22 @@ public class Joueur {
 			m_credits.remove(index);
 		}
 		return cartes;
+	}
+	
+	/**
+	 * Vérifie si le joueur peut prendre un chemin donné
+	 * @param chemin Chemin à vérifier
+	 * @return true si le joueur a les crédits nécessaires pour prendre le chemin, false sinon
+	 */
+	public boolean peutPrendre(Chemin chemin) {
+		int numcredits = 0;
+		
+		for (Credit carte : m_credits) {
+			if (carte == chemin.couleur()) {
+				numcredits += 1;
+			}
+		}
+		return numcredits >= chemin.longueur();
 	}
 	
 	/**

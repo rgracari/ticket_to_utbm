@@ -29,11 +29,36 @@ public class PiocheCursus {
 	 */
 	private void chargerCartes() {  // TODO
 		m_cartes = new ArrayList<Cursus>(m_numcartes);
-		m_cartes.add(new Cursus(UV.AP4A, UV.IA41, 10));
-		m_cartes.add(new Cursus(UV.AP4A, UV.IT45, 16));
-		m_cartes.add(new Cursus(UV.IA41, UV.LE03, 12));
-		m_cartes.add(new Cursus(UV.IT40, UV.IT42, 6));
-		m_cartes.add(new Cursus(UV.IT40, UV.RN40, 7));
+		m_cartes.add(new Cursus(UV.LE03, UV.SP07, 21));
+		m_cartes.add(new Cursus(UV.SI40, UV.IT43, 8));
+		m_cartes.add(new Cursus(UV.PC40, UV.SY40, 8));
+		m_cartes.add(new Cursus(UV.LE03, UV.SY42, 6));
+		m_cartes.add(new Cursus(UV.EC02, UV.SY40, 17));
+		m_cartes.add(new Cursus(UV.HT01, UV.LE07, 20));
+		m_cartes.add(new Cursus(UV.SY40, UV.DR02, 10));
+		m_cartes.add(new Cursus(UV.RN40, UV.TX52, 10));
+		m_cartes.add(new Cursus(UV.EC02, UV.GE07, 11));
+		m_cartes.add(new Cursus(UV.LE03, UV.IT44, 11));
+		m_cartes.add(new Cursus(UV.HE09, UV.IA41, 7));
+		m_cartes.add(new Cursus(UV.HE09, UV.GE07, 13));
+		m_cartes.add(new Cursus(UV.SP07, UV.TX52, 20));
+		m_cartes.add(new Cursus(UV.HE05, UV.RE4E, 11));
+		m_cartes.add(new Cursus(UV.ST40, UV.SY42, 17));
+		m_cartes.add(new Cursus(UV.IT42, UV.IT43, 5));
+		m_cartes.add(new Cursus(UV.SP07, UV.WE4A, 16));
+		m_cartes.add(new Cursus(UV.IT40, UV.RN41, 11));
+		m_cartes.add(new Cursus(UV.WE4A, UV.DR01, 9));
+		m_cartes.add(new Cursus(UV.HT01, UV.DR01, 13));
+		m_cartes.add(new Cursus(UV.LE05, UV.TX52, 12));
+		m_cartes.add(new Cursus(UV.WE4A, UV.RS40, 7));
+		m_cartes.add(new Cursus(UV.LE07, UV.SY42, 9));
+		m_cartes.add(new Cursus(UV.PH02, UV.LE03, 22));
+		m_cartes.add(new Cursus(UV.IT40, UV.DR02, 4));
+		m_cartes.add(new Cursus(UV.SP07, UV.AP4A, 8));
+		m_cartes.add(new Cursus(UV.HE05, UV.IT43, 12));
+		m_cartes.add(new Cursus(UV.LE07, UV.RS40, 13));
+		m_cartes.add(new Cursus(UV.PC40, UV.IT41, 9));
+		m_cartes.add(new Cursus(UV.PH02, UV.SP07, 9));
 	}
 	
 	/**
