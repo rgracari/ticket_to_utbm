@@ -5,7 +5,7 @@ package ticket_to_utbm.game;
  */
 public enum UV {  // 36 gares sur le plateau US
 	/**
-	 * Un UV
+	 * Un UV sympa
 	 */
 	IT40,
 	/**
