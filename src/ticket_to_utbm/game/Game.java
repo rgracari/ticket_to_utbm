@@ -186,6 +186,12 @@ public class Game {
 		joueur.ajouterChemin(chemin);
 	}
 	
+	public void prendreCheminHuma(int id, Joueur joueur, Credit couleur) {
+		Chemin chemin = m_plateau.prendre(id);
+		joueur.retirerCredits(couleur, chemin.longueur());
+		joueur.ajouterChemin(chemin);
+	}
+	
 	
 	/**
 	* @brief      Méthode qui permet de piocher une carte Cursus
@@ -223,6 +229,15 @@ public class Game {
 			}
 		}
 		return prenables;
+	}
+	
+	/**
+	 * Renvoie le chemin avec l’ID donné (sans le retirer)
+	 * @param id ID du chemin à récupérer
+	 * @return Le chemin demandé
+	 */
+	public Chemin chemin(int id) {
+		return m_plateau.chemin(id);
 	}
 	
 	/**
@@ -264,7 +279,7 @@ public class Game {
 		ArrayList<Chemin> chemins = joueur.chemins();
 		
 		// Construction de la matrice d'adjacence
-		int[][] adjacence = new int[chemins.size()][chemins.size()];
+		int[][] adjacence = new int[UV.values().length][UV.values().length];
 		for (int i = 0; i < chemins.size(); i++) {  // Initialisation avec des -inf
 			adjacence[i][i] = 0;
 			for (int j = i+1; j < chemins.size(); j++) {

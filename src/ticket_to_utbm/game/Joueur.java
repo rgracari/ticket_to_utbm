@@ -1,6 +1,7 @@
 package ticket_to_utbm.game;
 
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -10,9 +11,9 @@ import java.util.NoSuchElementException;
  * @author Grégori MIGNEROT
  */
 public class Joueur {
-	private String m_nom;                // Nom du joueur
+	private String m_nom;                 // Nom du joueur
 	private CouleurJoueur m_couleur;      // Couleur des pions du joueur
-	private ArrayList<Credit> m_credits;  // Main du joueur
+	private Hashtable<Credit, Integer> m_credits;  // Main du joueur
 	private ArrayList<Cursus> m_cursus;   // Cartes cursus prises
 	private ArrayList<Chemin> m_chemins;  // Chemins pris
 	private int m_ects;                   // Nombre de pions ECTS (aka pions wagons) restants
@@ -32,10 +33,19 @@ public class Joueur {
 	 * Réinitialise le joueur
 	 */
 	public void init() {
-		m_credits = new ArrayList<Credit>(6);
+		m_credits = new Hashtable<Credit, Integer>(9);
+		m_credits.put(Credit.Rouge, 0);
+		m_credits.put(Credit.Orange, 0);
+		m_credits.put(Credit.Jaune, 0);
+		m_credits.put(Credit.Vert, 0);
+		m_credits.put(Credit.Bleu, 0);
+		m_credits.put(Credit.Rose, 0);
+		m_credits.put(Credit.Blanc, 0);
+		m_credits.put(Credit.Noir, 0);
+		m_credits.put(Credit.Humanite, 0);
 		m_cursus = new ArrayList<Cursus>(3);
 		m_chemins = new ArrayList<Chemin>(12);
-		m_ects = 45;
+		m_ects = 8;  // TODO : Remplacer 12 par 45
 	}
 	
 	/**
@@ -60,7 +70,13 @@ public class Joueur {
 	 * @return Liste des cartes crédit du joueur
 	 */
 	public ArrayList<Credit> credits(){
-		return new ArrayList<Credit>(m_credits);
+		ArrayList<Credit> cartes = new ArrayList<Credit>();
+		for (Credit couleur : m_credits.keySet()) {
+			for (int i = 0; i < m_credits.get(couleur); i++) {
+				cartes.add(couleur);
+			}
+		}
+		return cartes;
 	}
 	
 	/**
@@ -94,7 +110,7 @@ public class Joueur {
 	 * @param carte Carte à ajouter
 	 */
 	public void ajouterCredit(Credit carte) {
-		m_credits.add(carte);
+		m_credits.put(carte, m_credits.get(carte) + 1);
 	}
 	
 	/**
@@ -102,7 +118,9 @@ public class Joueur {
 	 * @param cartes Cartes à ajouter
 	 */
 	public void ajouterCredits(Collection<Credit> cartes) {
-		m_credits.addAll(cartes);
+		for (Credit carte : cartes) {
+			m_credits.put(carte, m_credits.get(carte) + 1);
+		}
 	}
 	
 	/**
@@ -111,7 +129,7 @@ public class Joueur {
 	 */
 	public void ajouterCredits(Credit... cartes) {
 		for (Credit carte : cartes) {
-			m_credits.add(carte);
+			m_credits.put(carte, m_credits.get(carte) + 1);
 		}
 	}
 	
@@ -142,14 +160,12 @@ public class Joueur {
 	}
 	
 	/**
-	 * Retire une carte crédit de la main du joueur
-	 * @param index Index de la carte dans la main
-	 * @return Carte retirée
+	 * Donne le nombre de cartes de la couleur demandée qu’a le joueur
+	 * @param couleur Couleur demandée
+	 * @return Nombre de cartes de la couleur demandée dans la main du joueur
 	 */
-	public Credit retirerCredit(int index) {
-		Credit carte = m_credits.get(index);
-		m_credits.remove(index);
-		return carte;
+	public int nombreCartes(Credit couleur) {
+		return m_credits.get(couleur);
 	}
 	
 	/**
@@ -161,26 +177,21 @@ public class Joueur {
 	 * @throws NoSuchElementException S'il n'y a pas assez de cartes de la couleur demandée dans la main du joueur
 	 */
 	public ArrayList<Credit> retirerCredits(Credit couleur, int nombre) throws NoSuchElementException {
-		// On doit vérifier s'il y a bien le nombre de cartes avant de commencer à les extraire, donc on récupère leur indice
-		ArrayList<Integer> indices = new ArrayList<Integer>(nombre);
-		
-		// On itère dans l'ordre inverse pour pouvoir les retirer facilement de la liste plus tard
-		for (int i = m_credits.size() - 1; (i >= 0 && indices.size() < nombre); i++) {
-			if (m_credits.get(i) == couleur) {
-				indices.add(i);
-			}
+		int numcartes = m_credits.get(couleur);
+		int numhuma = m_credits.get(Credit.Humanite);
+		if (numcartes + numhuma < nombre) {
+			throw new NoSuchElementException("Pas assez de cartes pour satisfaire la demande");
 		}
-		
-		if (indices.size() < nombre) {
-			throw new NoSuchElementException("Pas assez de cartes de la bonne couleur dans la main du joueur");
-		}
-		
+		int cartesDepensees = Math.min(numcartes, nombre);
+		int humaDepensees = nombre - cartesDepensees;
+		m_credits.put(couleur, numcartes - cartesDepensees);
+		m_credits.put(Credit.Humanite, numhuma - humaDepensees);
 		ArrayList<Credit> cartes = new ArrayList<Credit>(nombre);
-		// Comme les indices vont de la fin vers le début, 
-		// on peut les supprimer dans l'ordre sans crainte de changer les indices suivants
-		for (int index : indices) {
-			cartes.add(m_credits.get(index));
-			m_credits.remove(index);
+		for (int i = 0; i < cartesDepensees; i++) {
+			cartes.add(couleur);
+		}
+		for (int i = 0; i < humaDepensees; i++) {
+			cartes.add(Credit.Humanite);
 		}
 		return cartes;
 	}
@@ -191,14 +202,23 @@ public class Joueur {
 	 * @return true si le joueur a les crédits nécessaires pour prendre le chemin, false sinon
 	 */
 	public boolean peutPrendre(Chemin chemin) {
-		int numcredits = 0;
-		
-		for (Credit carte : m_credits) {
-			if (carte == chemin.couleur()) {
-				numcredits += 1;
+		if (m_ects >= chemin.longueur()) {
+			if (chemin.couleur() == Credit.Humanite) {
+				int maxcartes = 0;
+				for (Credit couleur : m_credits.keySet()) {
+					if (couleur != Credit.Humanite) {
+						maxcartes = Math.max(m_credits.get(couleur), maxcartes);
+					}
+				}
+				return maxcartes + m_credits.get(Credit.Humanite) >= chemin.longueur();
+			} else {
+				int numcartes = m_credits.get(chemin.couleur());
+				int numhuma = m_credits.get(Credit.Humanite);
+				return numcartes + numhuma >= chemin.longueur();
 			}
+		} else {
+			return false;
 		}
-		return numcredits >= chemin.longueur();
 	}
 	
 	/**

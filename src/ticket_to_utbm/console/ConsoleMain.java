@@ -12,10 +12,10 @@ import ticket_to_utbm.game.Chemin;
 
 public class ConsoleMain {
 	private Game m_game;
+	private static Scanner scan;
 	
 	public ConsoleMain() {
 		m_game = new Game();
-		Scanner scan = new Scanner(System.in);
 		
 		System.out.println("Ticket to UTBM\n=========================");
 		System.out.print("Nombre de joueurs : ");
@@ -41,15 +41,15 @@ public class ConsoleMain {
 		}
 		
 		for (Joueur joueur : m_game.joueurs()) {
+			System.out.println("\n\nJoueur " + joueur.nom());
 			prendreCursus(joueur);
+			m_game.piocherCreditCache(50, joueur);  // TODO : DEBUG ! Remplacer 50 par 4
 		}
 		
 		jeu();
-		scan.close();
 	}
 	
 	private void jeu() {
-		Scanner scan = new Scanner(System.in);
 		boolean continuer = true;
 		int derniertour = -1;
 		int tour = 1;
@@ -58,8 +58,10 @@ public class ConsoleMain {
 			for (Joueur joueur : joueurs) {
 				nettoyerConsole();
 				couleurConsole(joueur.couleur());
-				System.out.println("Tour " + tour + " : " + joueur.nom());
+				System.out.println("\n\nTour " + tour + " : " + joueur.nom());
 				couleurConsole();
+				System.out.println("\nReste " + joueur.ectsRestants() + " ECTS");
+				System.out.println("Score actuel : " + joueur.score());
 				System.out.println("\nMain :");
 				for (Credit carte : joueur.credits()) {
 					afficherCredit(carte);
@@ -69,6 +71,7 @@ public class ConsoleMain {
 				for (Cursus carte : joueur.cursus()) {
 					if (joueur.cursusAccompli(carte)) {
 						//System.out.print("\033[37m");
+						System.out.print("OK : ");
 					}
 					afficherCursus(carte);
 					couleurConsole();
@@ -82,11 +85,13 @@ public class ConsoleMain {
 				System.out.println();
 				
 				boolean fait = false;
-				int action = 0;
+				int action;
 				while (!fait) {
+					action = 0;
 					while (action < 1 || action > 3) {
 						System.out.print("1 - Piocher\n2 - Prendre un chemin\n3 - Prendre des cartes cursus\nAction : ");
 						action = scan.nextInt();
+						scan.nextLine();
 					}
 					
 					switch (action) {
@@ -95,8 +100,9 @@ public class ConsoleMain {
 						case 3: fait = prendreCursus(joueur); break;
 					}
 				}
-				if (joueur.ectsRestants() <= 2) {
+				if (joueur.ectsRestants() <= 2 && derniertour < 0) {
 					derniertour = tour + 1;
+					System.out.println("Le prochain tour sera le dernier !");
 				}
 			}
 			if (tour == derniertour) {
@@ -119,22 +125,19 @@ public class ConsoleMain {
 			System.out.print(joueur.nom());
 			couleurConsole();
 			int score = scores.get(joueur.couleur());
-			System.out.print(" : " + score);
+			System.out.println(" : " + score + " points");
 			if (score > maxscore) {
 				maxscore = score;
 				gagnant = joueur;
 			}
 		}
 		couleurConsole(gagnant.couleur());
-		System.out.print(gagnant.nom());
+		System.out.print("\n" + gagnant.nom());
 		couleurConsole();
 		System.out.print(" a gagné");
-		
-		scan.close();
 	}
 	
 	boolean piocher(Joueur joueur) {
-		Scanner scan = new Scanner(System.in);
 		int action = -1;
 		while (action < 0 || action > 5) {
 			System.out.print("0 - Face cachée\n1-5 : Face visible\nChoix : ");
@@ -144,14 +147,23 @@ public class ConsoleMain {
 		if (action == 0) {
 			m_game.piocherCreditCache(1, joueur);
 		} else {
-			humavisible = m_game.piocherCreditVisible(action, joueur);
+			humavisible = m_game.piocherCreditVisible(action - 1, joueur);
 		}
 		
 		// On réaffiche la main
+		System.out.println("\nMain :");
 		for (Credit carte : joueur.credits()) {
 			afficherCredit(carte);
 			System.out.print("  ");
 		}
+		System.out.println();
+		
+		System.out.println("\nPlateau :");
+		for (int i = 0; i < 5; i++) {
+			afficherCredit(m_game.creditVisible(i));
+			System.out.print("  ");
+		}
+		System.out.println();
 		
 		// Carte suivante
 		if (!humavisible) {
@@ -166,22 +178,20 @@ public class ConsoleMain {
 				if (action == 0) {
 					m_game.piocherCreditCache(1, joueur);
 				} else {
-					if (m_game.creditVisible(action) == Credit.Humanite) {
+					if (m_game.creditVisible(action - 1) == Credit.Humanite) {
 						humavisible = true;
 						System.out.println("Vous ne pouvez pas piocher plus d'une humanité visible");
 					} else {
-						m_game.piocherCreditVisible(action, joueur);
+						m_game.piocherCreditVisible(action - 1, joueur);
 					}
 				}
 			} while (humavisible);
 		}
 		
-		scan.close();
 		return true;
 	}
 	
 	boolean prendreChemin(Joueur joueur) {
-		Scanner scan = new Scanner(System.in);
 		if (joueur.chemins().size() > 0) {
 			System.out.println("Chemins déjà pris : ");
 			for (Chemin chemin : joueur.chemins()) {
@@ -193,21 +203,71 @@ public class ConsoleMain {
 		
 		int action;
 		ArrayList<Chemin> prenables = m_game.cheminsPossibles(joueur);
+		System.out.println("Chemins prenables :");
+		for (Chemin chemin : prenables) {
+			System.out.print(chemin.id() + " - " + chemin.uv1() + " <-> " + chemin.uv2() + " : " + chemin.longueur() + " ");
+			afficherCredit(chemin.couleur());
+			System.out.println();
+		}
+		System.out.println("0 - Retour");
+		
 		do {
-			System.out.println("Chemins prenables :");
-			for (Chemin chemin : prenables) {
-				System.out.print(chemin.id() + " - " + chemin.uv1() + " <-> " + chemin.uv2() + " : " + chemin.longueur() + " ");
-				afficherCredit(chemin.couleur());
-				System.out.println();
-			}
-			System.out.print("0 - Retour\nChoix : ");
+			System.out.print("Choix : ");
 			action = scan.nextInt();
 			scan.nextLine();
-		} while (action == 0 || m_game.cheminDisponible(action));
+		} while (action != 0 && !m_game.cheminDisponible(action));
 		
-		scan.close();
 		if (action == 0) {
 			return false;
+		} else if (m_game.chemin(action).couleur() == Credit.Humanite) {
+			int numhuma = joueur.nombreCartes(Credit.Humanite);
+			int longueur = m_game.chemin(action).longueur();
+			int mincartes = longueur - numhuma;
+			System.out.println("Choisissez la couleur à utiliser pour prendre le chemin gris :");
+			int numcartes;
+			if ((numcartes = joueur.nombreCartes(Credit.Rouge)) >= mincartes) {
+				System.out.println("1 - Rouge (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			if ((numcartes = joueur.nombreCartes(Credit.Orange)) >= mincartes) {
+				System.out.println("2 - Orange (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			if ((numcartes = joueur.nombreCartes(Credit.Jaune)) >= mincartes) {
+				System.out.println("3 - Jaune (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			if ((numcartes = joueur.nombreCartes(Credit.Vert)) >= mincartes) {
+				System.out.println("4 - Vert (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			if ((numcartes = joueur.nombreCartes(Credit.Bleu)) >= mincartes) {
+				System.out.println("5 - Bleu (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			if ((numcartes = joueur.nombreCartes(Credit.Rose)) >= mincartes) {
+				System.out.println("6 - Rose (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			if ((numcartes = joueur.nombreCartes(Credit.Blanc)) >= mincartes) {
+				System.out.println("7 - Blanc (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			if ((numcartes = joueur.nombreCartes(Credit.Noir)) >= mincartes) {
+				System.out.println("8 - Noir (" + Math.min(longueur, numcartes) + " + " + Math.max(longueur - numcartes, 0) + " huma)");
+			}
+			int indexCouleur = -1;
+			while (indexCouleur < 1 || indexCouleur > 8) {
+				System.out.print("Couleur : ");
+				indexCouleur = scan.nextInt();
+				scan.nextLine();
+			}
+			Credit couleur = null;
+			switch (indexCouleur) {
+				case 1 : couleur = Credit.Rouge; break;
+				case 2 : couleur = Credit.Orange; break;
+				case 3 : couleur = Credit.Jaune; break;
+				case 4 : couleur = Credit.Vert; break;
+				case 5 : couleur = Credit.Bleu; break;
+				case 6 : couleur = Credit.Rose; break;
+				case 7 : couleur = Credit.Blanc; break;
+				case 8 : couleur = Credit.Noir; break;
+			}
+			m_game.prendreCheminHuma(action, joueur, couleur);
+			return true;
 		} else {
 			m_game.prendreChemin(action, joueur);
 			return true;
@@ -215,7 +275,6 @@ public class ConsoleMain {
 	}
 	
 	boolean prendreCursus(Joueur joueur) {
-		Scanner scan = new Scanner(System.in);
 		if (joueur.chemins().size() > 0) {
 			System.out.println("Chemins déjà pris : ");
 			for (Chemin chemin : joueur.chemins()) {
@@ -227,7 +286,7 @@ public class ConsoleMain {
 		
 		ArrayList<Cursus> cartes = m_game.piocherCursus(3);
 		for (int i = 0; i < 3; i++) {
-			System.out.print(i + " - ");
+			System.out.print((i + 1) + " - ");
 			afficherCursus(cartes.get(i));
 		}
 		
@@ -242,9 +301,9 @@ public class ConsoleMain {
 			if (nums.length() <= 2) {
 				boolean indexvalides = true;
 				for (int i = 0; i < nums.length(); i++) {
-					int index = Integer.parseInt(nums.substring(i, i));
+					int index = Integer.parseInt(nums.substring(i, i + 1)) - 1;
 					poubelle.add(index);
-					if (index > 3 || index < 0) {
+					if (index > 2 || index < 0) {
 						indexvalides = false;
 					}
 				}
@@ -253,14 +312,13 @@ public class ConsoleMain {
 				}
 			}
 		}
-		for (int i = 0; i < 2; i++) {
-			if (poubelle.contains(i + 1)) {
+		for (int i = 0; i < 3; i++) {
+			if (poubelle.contains(i)) {
 				m_game.defausserCursus(cartes.get(i));
 			} else {
 				joueur.ajouterCursus(cartes.get(i));
 			}
 		}
-		scan.close();
 		return true;
 	}
 	
@@ -321,7 +379,9 @@ public class ConsoleMain {
 	}
 	
 	public static void main(String[] args) {
+		scan = new Scanner(System.in);
 		new ConsoleMain();
+		scan.close();
 	}
 
 }
