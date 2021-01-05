@@ -43,7 +43,7 @@ public class ConsoleMain {
 		for (Joueur joueur : m_game.joueurs()) {
 			System.out.println("\n\nJoueur " + joueur.nom());
 			prendreCursus(joueur);
-			m_game.piocherCreditCache(50, joueur);  // TODO : DEBUG ! Remplacer 50 par 4
+			m_game.piocherCreditCache(4, joueur);
 		}
 		
 		jeu();

@@ -45,7 +45,7 @@ public class Joueur {
 		m_credits.put(Credit.Humanite, 0);
 		m_cursus = new ArrayList<Cursus>(3);
 		m_chemins = new ArrayList<Chemin>(12);
-		m_ects = 8;  // TODO : Remplacer 12 par 45
+		m_ects = 45;
 	}
 	
 	/**
