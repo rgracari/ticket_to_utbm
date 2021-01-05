@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="public" additionalparam=" -encoding UTF-8" author="true" classpath="." destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="ticket_to_utbm.console,ticket_to_utbm,ticket_to_utbm.game" source="15" sourcefiles="src/module-info.java" sourcepath="src" splitindex="true" use="true" version="true"/>
+    </target>
+</project>

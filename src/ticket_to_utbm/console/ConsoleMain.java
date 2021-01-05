@@ -10,10 +10,23 @@ import ticket_to_utbm.game.Credit;
 import ticket_to_utbm.game.Cursus;
 import ticket_to_utbm.game.Chemin;
 
+/**
+ * Classe qui permet l'affichage du jeu dans le terminal. Elle a été conçu de façon
+ * complètement découplée de la logique interne du jeu. On peut considérer cette classe
+ * comme une view sur la game logic.
+ * 
+ * L'utilisateur peut intéragir avec les flots standards afin de jouer au jeu.
+ */
+
 public class ConsoleMain {
 	private Game m_game;
 	private static Scanner scan;
 	
+	/**
+	 * Initialisation des prérequis permettant l'execution de la console du jeu.
+	 * Les joueurs sont créés, la logique interne est initialisé et la game loop est lancé.
+	 * Le programme s'arrête lorsque la partie est arrivé a son dernier tour.
+	 */
 	public ConsoleMain() {
 		m_game = new Game();
 		
@@ -378,6 +391,10 @@ public class ConsoleMain {
 		System.out.println("  : (" + carte.valeur() + ")");
 	}
 	
+	/**
+	 * Méthode temporaire pour le debug
+	 * @param args temporaire
+	 */
 	public static void main(String[] args) {
 		scan = new Scanner(System.in);
 		new ConsoleMain();

@@ -20,7 +20,7 @@ public class Joueur {
 	
 	/**
 	 * Initialise le joueur
-	 * @param name Nom du joueur
+	 * @param nom Nom du joueur
 	 * @param couleur Couleur associée au joueur
 	 */
 	public Joueur(String nom, CouleurJoueur couleur) {
