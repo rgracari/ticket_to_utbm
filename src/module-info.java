@@ -1,5 +1,5 @@
 /**
-* Ticket to Utbm est un reprise du célèbre jeu Ticket to Ride dans le contexte de l'UTBM.
+* Ticket to Utbm est une reprise du célèbre jeu Ticket to Ride dans le contexte de l'UTBM.
 * Développé en Java 11 natif et JavaFX (nécessaire pour l'éxecution).
 *
 * @author Marie ASPRO, Grégori MIGNEROT, Raphael RIBEIRO, Baptiste LANGEN
