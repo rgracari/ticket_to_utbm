@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 
 public class Game {
-	private final int m_max_huma_visibles = 3;
+	private final int m_max_huma_visibles = 2;
 	
 	// m_listeJoueur : contient la liste de tous les joueurs participants
 	private List<Joueur> m_listeJoueur;

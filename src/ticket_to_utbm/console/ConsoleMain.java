@@ -71,7 +71,7 @@ public class ConsoleMain {
 			for (Joueur joueur : joueurs) {
 				nettoyerConsole();
 				couleurConsole(joueur.couleur());
-				System.out.println("\n\nTour " + tour + " : " + joueur.nom());
+				System.out.println("\n\n============\n============\nTour " + tour + " : " + joueur.nom());
 				couleurConsole();
 				System.out.println("\nReste " + joueur.ectsRestants() + " ECTS");
 				System.out.println("Score actuel : " + joueur.score());
@@ -181,8 +181,8 @@ public class ConsoleMain {
 		// Carte suivante
 		if (!humavisible) {
 			humavisible = false;
-			action = -1;
 			do {
+				action = -1;
 				while (action < 0 || action > 5) {
 					System.out.print("0 - Face cachée\n1-5 : Face visible\nChoix : ");
 					action = scan.nextInt();
