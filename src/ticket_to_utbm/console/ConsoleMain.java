@@ -56,7 +56,7 @@ public class ConsoleMain {
 		for (Joueur joueur : m_game.joueurs()) {
 			System.out.println("\n\nJoueur " + joueur.nom());
 			prendreCursus(joueur);
-			m_game.piocherCreditCache(4, joueur);
+			m_game.piocherCreditCache(40, joueur);  // FIXME : 4
 		}
 		
 		jeu();
@@ -115,7 +115,7 @@ public class ConsoleMain {
 				}
 				if (joueur.ectsRestants() <= 2 && derniertour < 0) {
 					derniertour = tour + 1;
-					System.out.println("Le prochain tour sera le dernier !");
+					System.out.println("------\nLe prochain tour sera le dernier !\n------");
 				}
 			}
 			if (tour == derniertour) {

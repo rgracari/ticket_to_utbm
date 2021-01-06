@@ -2,6 +2,9 @@ package ticket_to_utbm.game;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 /**
  * @author   Marie ASPRO, Raphael Ribeiro
@@ -275,49 +278,56 @@ public class Game {
 	}
 	
 	/**
-	 * Trouve le chemin le plus long appartenant au joueur
+	 * Trouve la longueur du chemin le plus long appartenant au joueur
 	 * @param joueur Joueur concerné
 	 * @return Longueur du plus long chemin trouvé
 	 */
 	private int cheminLePlusLong(Joueur joueur) {
 		ArrayList<Chemin> chemins = joueur.chemins();
-		
-		// Construction de la matrice d'adjacence
-		int[][] adjacence = new int[UV.values().length][UV.values().length];
-		for (int i = 0; i < chemins.size(); i++) {  // Initialisation avec des -inf
-			adjacence[i][i] = 0;
-			for (int j = i+1; j < chemins.size(); j++) {
-				// Le graphe n'est pas orienté, donc on peut faire ce genre de réductions avec j partant de i+1
-				// et affecter Mij et Mji en même temps vu que M est symétrique
-				adjacence[i][j] = adjacence[j][i] = Integer.MIN_VALUE;
-			}
-		}
-		for (Chemin chemin : chemins) {  // Ajout des valeurs de la matrice d'adjacences
-			adjacence[chemin.uv1().ordinal()][chemin.uv2().ordinal()] = chemin.longueur();
-			adjacence[chemin.uv2().ordinal()][chemin.uv1().ordinal()] = chemin.longueur();
+		HashSet<UV> uvs = new HashSet<UV>();
+		for (Chemin chemin : chemins) {
+			uvs.add(chemin.uv1());
+			uvs.add(chemin.uv2());
 		}
 		
-		// Floyd-Warshall à l'envers, en prenant le max au lieu du min
-		// Trouve le plus long chemin entre chaque paire de sommets
-		for (int k = 0; k < chemins.size(); k++) {
-			for (int i = 0; i < chemins.size(); i++) {
-				for (int j = i+1; j < chemins.size(); j++){
-					adjacence[i][j] = adjacence[j][i] = Math.max(adjacence[i][j], adjacence[i][k] + adjacence[k][j]);
+		int longueurmax = Integer.MIN_VALUE;
+		for (UV source : uvs) {
+			// Pour chaque UV source, on fait un Dijkstra à l’envers
+			// c’est à dire avec -longueur au lieu de +longueur pour tous les chemins
+			// On a assuré dans Joueur.peutPrendre que le graphe sera acyclique, donc c’est bon
+			LinkedList<UV> file = new LinkedList<UV>();
+			Hashtable<UV, Integer> distances = new Hashtable<UV, Integer>(uvs.size());
+			HashSet<UV> passes = new HashSet<UV>(uvs.size());
+			
+			file.add(source);
+			distances.put(source, 0);
+			while (file.size() > 0) {
+				UV point = file.remove();
+				passes.add(point);
+				for (Chemin chemin : chemins) {
+					UV voisin;
+					if (chemin.uv1() == point) {
+						voisin = chemin.uv2();
+					} else if (chemin.uv2() == point) {
+						voisin = chemin.uv1();
+					} else {
+						continue;
+					}
+					if (!passes.contains(voisin)) {
+						file.add(voisin);
+						int nouvelledist = distances.get(point) - chemin.longueur();
+						if (!distances.contains(voisin) || nouvelledist < distances.get(voisin)) {
+							distances.put(voisin, nouvelledist);
+						}
+					}
 				}
 			}
-		}
-		
-		// Récupération de la valeur maximale dans tous les chemins trouvés
-		int longueurmax = -Integer.MIN_VALUE;
-		for (int i = 0; i < chemins.size(); i++) {
-			for (int j = i+1; j < chemins.size(); j++) {
-				if (adjacence[i][j] > longueurmax) {
-					longueurmax = adjacence[i][j];
-				}
+			int mindist = Integer.MAX_VALUE;
+			for (int dist : distances.values()) {
+				mindist = Math.min(mindist, dist);
 			}
+			longueurmax = Math.max(longueurmax, -mindist);
 		}
-		
 		return longueurmax;
 	}
-
 }

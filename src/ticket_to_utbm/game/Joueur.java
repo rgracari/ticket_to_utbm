@@ -203,20 +203,34 @@ public class Joueur {
 	 */
 	public boolean peutPrendre(Chemin chemin) {
 		if (m_ects >= chemin.longueur()) {
+			boolean possible;
 			if (chemin.couleur() == Credit.Humanite) {
 				int maxcartes = 0;
+				// On prend la couleur dont le joueur a le plus d’exemplaire pour vérifier si le chemin gris peut être pris
 				for (Credit couleur : m_credits.keySet()) {
 					if (couleur != Credit.Humanite) {
 						maxcartes = Math.max(m_credits.get(couleur), maxcartes);
 					}
 				}
-				return maxcartes + m_credits.get(Credit.Humanite) >= chemin.longueur();
+				possible = maxcartes + m_credits.get(Credit.Humanite) >= chemin.longueur();
 			} else {
 				int numcartes = m_credits.get(chemin.couleur());
 				int numhuma = m_credits.get(Credit.Humanite);
-				return numcartes + numhuma >= chemin.longueur();
+				possible = numcartes + numhuma >= chemin.longueur();
 			}
-		} else {
+			if (possible) {
+				HashSet<Chemin> chemins = new HashSet<Chemin>(m_chemins);
+				HashSet<UV> passe = new HashSet<UV>();
+				// Évite les boucles (inutile pour le joueur, et pour le chemin le plus long il faut un graphe acyclique)
+				if (routeExiste(chemins, passe, chemin.uv1(), chemin.uv2())) {
+					return false;
+				} else {  // Ferait une boucle
+					return true;
+				}
+			} else {  // Pas les cartes crédits pour prendre le chemin
+				return false;
+			}
+		} else {  // Pas assez de pions ECTS pour prendre le chemin
 			return false;
 		}
 	}
