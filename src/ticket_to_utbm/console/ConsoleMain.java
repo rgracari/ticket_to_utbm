@@ -15,17 +15,17 @@ import ticket_to_utbm.game.Chemin;
  * complètement découplée de la logique interne du jeu. On peut considérer cette classe
  * comme une view sur la game logic.
  * 
- * L'utilisateur peut intéragir avec les flots standards afin de jouer au jeu.
+ * L'utilisateur peut interagir avec les flots standards afin de jouer au jeu.
  */
 
 public class ConsoleMain {
 	private Game m_game;
-	private static Scanner scan;
+	private static Scanner scan;  // Solution pour éviter d’avoir plusieurs scans sur le même stream en même temps (cause des gros problèmes)
 	
 	/**
-	 * Initialisation des prérequis permettant l'execution de la console du jeu.
-	 * Les joueurs sont créés, la logique interne est initialisé et la game loop est lancé.
-	 * Le programme s'arrête lorsque la partie est arrivé a son dernier tour.
+	 * Initialisation des prérequis permettant l'exécution du jeu en console.
+	 * Les joueurs sont créés, la logique interne est initialisée et la game loop est lancée.
+	 * Le programme s'arrête lorsque la partie est arrivée a son dernier tour.
 	 */
 	public ConsoleMain() {
 		m_game = new Game();
@@ -34,45 +34,47 @@ public class ConsoleMain {
 		System.out.print("Nombre de joueurs : ");
 		int nbjoueurs = scan.nextInt();
 		scan.nextLine();
-		for (int i = 0; i < nbjoueurs; i++) {
-			nettoyerConsole();
+		for (int i = 0; i < nbjoueurs; i++) {  // Paramétrage des joueurs (nom + couleur)
 			System.out.print("Nom du joueur " + (i + 1) + " : ");
 			String nom = scan.nextLine();
-			System.out.print("1 - Rouge\n2 - Vert\n3 - Bleu\n4 - Jaune\n5 - Noir\nCouleur : ");
-			int idcouleur = scan.nextInt();
-			scan.nextLine();
-			CouleurJoueur couleur;
+			int idcouleur = -1;
+			while (idcouleur < 1 || idcouleur > 5) {
+				System.out.print("1 - Rouge\n2 - Vert\n3 - Bleu\n4 - Jaune\n5 - Noir\nCouleur : ");
+				idcouleur = scan.nextInt();
+				scan.nextLine();
+			}
+			CouleurJoueur couleur = null;
 			switch (idcouleur) {
 				case 1 : couleur = CouleurJoueur.Rouge; break;
 				case 2 : couleur = CouleurJoueur.Vert; break;
 				case 3 : couleur = CouleurJoueur.Bleu; break;
 				case 4 : couleur = CouleurJoueur.Jaune; break;
 				case 5 : couleur = CouleurJoueur.Noir; break;
-				default: i -= 1; continue;  // Quick-and-dirty
 			}
 			m_game.ajouterJoueur(nom, couleur);
 		}
 		
-		for (Joueur joueur : m_game.joueurs()) {
+		for (Joueur joueur : m_game.joueurs()) {  // Initialisation de la main des joueurs (premiers cursus + 4 crédits)
 			System.out.println("\n\nJoueur " + joueur.nom());
 			prendreCursus(joueur);
-			m_game.piocherCreditCache(40, joueur);  // FIXME : 4
+			m_game.piocherCreditCache(4, joueur);
 		}
 		
 		jeu();
 	}
 	
+	/**
+	 * Fonction principale du jeu, appelée une fois que le système de jeu et les joueurs sont initialisés
+	 */
 	private void jeu() {
 		boolean continuer = true;
-		int derniertour = -1;
-		int tour = 1;
+		int derniertour = -1;  // -1 tant que le jeu tourne, numéro du dernier tour une fois qu’un joueur n’a plus que 2 ECTS ou moins
+		int tour = 1;  // Tour actuel
 		ArrayList<Joueur> joueurs = m_game.joueurs();
 		while (continuer) {
 			for (Joueur joueur : joueurs) {
-				nettoyerConsole();
-				couleurConsole(joueur.couleur());
+				// Affichage des infos du joueur et des cartes crédits visibles
 				System.out.println("\n\n============\n============\nTour " + tour + " : " + joueur.nom());
-				couleurConsole();
 				System.out.println("\nReste " + joueur.ectsRestants() + " ECTS");
 				System.out.println("Score actuel : " + joueur.score());
 				System.out.println("\nMain :");
@@ -82,12 +84,12 @@ public class ConsoleMain {
 				}
 				System.out.println("\n");
 				for (Cursus carte : joueur.cursus()) {
-					if (joueur.cursusAccompli(carte)) {
-						//System.out.print("\033[37m");
-						System.out.print("OK : ");
-					}
 					afficherCursus(carte);
-					couleurConsole();
+					if (joueur.cursusAccompli(carte)) {
+						System.out.println(" [OK]");
+					} else {
+						System.out.println();
+					}
 				}
 				
 				System.out.println("\nPlateau");
@@ -97,6 +99,7 @@ public class ConsoleMain {
 				}
 				System.out.println();
 				
+				// Sélection de l’action
 				boolean fait = false;
 				int action;
 				while (!fait) {
@@ -113,9 +116,9 @@ public class ConsoleMain {
 						case 3: fait = prendreCursus(joueur); break;
 					}
 				}
-				if (joueur.ectsRestants() <= 2 && derniertour < 0) {
+				if (joueur.ectsRestants() <= 2 && derniertour < 0) {  // Le joueur a moins de 2 ECTS : dernier tour
 					derniertour = tour + 1;
-					System.out.println("------\nLe prochain tour sera le dernier !\n------");
+					System.out.println("------------\nLe prochain tour sera le dernier !\n------------");
 				}
 			}
 			if (tour == derniertour) {
@@ -124,6 +127,7 @@ public class ConsoleMain {
 			tour += 1;
 		}
 		
+		// Calcul des scores finaux
 		Hashtable<CouleurJoueur, Integer> scores = new Hashtable<CouleurJoueur, Integer>();
 		for (Joueur joueur : joueurs) {
 			scores.put(joueur.couleur(), joueur.score(true));
@@ -134,9 +138,7 @@ public class ConsoleMain {
 		Joueur gagnant = null;
 		int maxscore = -1;
 		for (Joueur joueur : joueurs) {
-			couleurConsole(joueur.couleur());
 			System.out.print(joueur.nom());
-			couleurConsole();
 			int score = scores.get(joueur.couleur());
 			System.out.println(" : " + score + " points");
 			if (score > maxscore) {
@@ -144,13 +146,16 @@ public class ConsoleMain {
 				gagnant = joueur;
 			}
 		}
-		couleurConsole(gagnant.couleur());
 		System.out.print("\n" + gagnant.nom());
-		couleurConsole();
 		System.out.print(" a gagné");
 	}
 	
-	boolean piocher(Joueur joueur) {
+	/**
+	 * Action de piocher pour un joueur
+	 * @param joueur Joueur concerné
+	 * @return true si l’action est effectuée, false si retour arrière
+	 */
+	private boolean piocher(Joueur joueur) {
 		int action = -1;
 		while (action < 0 || action > 5) {
 			System.out.print("0 - Face cachée\n1-5 : Face visible\nChoix : ");
@@ -179,7 +184,7 @@ public class ConsoleMain {
 		System.out.println();
 		
 		// Carte suivante
-		if (!humavisible) {
+		if (!humavisible) {  // Si le joueur a pris une humanité visible il ne peut pas en reprendre une
 			humavisible = false;
 			do {
 				action = -1;
@@ -191,7 +196,7 @@ public class ConsoleMain {
 				if (action == 0) {
 					m_game.piocherCreditCache(1, joueur);
 				} else {
-					if (m_game.creditVisible(action - 1) == Credit.Humanite) {
+					if (m_game.creditVisible(action - 1) == Credit.Humanite) {  // La deuxième carte piochée ne peut pas être une huma visible
 						humavisible = true;
 						System.out.println("Vous ne pouvez pas piocher plus d'une humanité visible");
 					} else {
@@ -204,7 +209,13 @@ public class ConsoleMain {
 		return true;
 	}
 	
-	boolean prendreChemin(Joueur joueur) {
+	/**
+	 * Action de prendre un chemin
+	 * @param joueur Joueur concerné
+	 * @return true si l’action est effectuée, false pour retour arrière
+	 */
+	private boolean prendreChemin(Joueur joueur) {
+		// Affichage des chemins appartenant déjà au joueur
 		if (joueur.chemins().size() > 0) {
 			System.out.println("Chemins déjà pris : ");
 			for (Chemin chemin : joueur.chemins()) {
@@ -214,6 +225,7 @@ public class ConsoleMain {
 			}
 		}
 		
+		// Affichage que le joueur peut prendre avec les crédits et les pions ECTS qu’il a
 		int action;
 		ArrayList<Chemin> prenables = m_game.cheminsPossibles(joueur);
 		System.out.println("Chemins prenables :");
@@ -233,6 +245,7 @@ public class ConsoleMain {
 		if (action == 0) {
 			return false;
 		} else if (m_game.chemin(action).couleur() == Credit.Humanite) {
+			// Sélection de la couleur à utiliser pour prendre un chemin gris
 			int numhuma = joueur.nombreCartes(Credit.Humanite);
 			int longueur = m_game.chemin(action).longueur();
 			int mincartes = longueur - numhuma;
@@ -287,7 +300,13 @@ public class ConsoleMain {
 		}
 	}
 	
-	boolean prendreCursus(Joueur joueur) {
+	/**
+	 * Action de prendre de nouvelle cartes cursus
+	 * @param joueur Joueur concernée
+	 * @return true si l’action est effectuée, false pour retour arrière
+	 */
+	private boolean prendreCursus(Joueur joueur) {
+		// Affichage des chemins appartenant déjà au joueur
 		if (joueur.chemins().size() > 0) {
 			System.out.println("Chemins déjà pris : ");
 			for (Chemin chemin : joueur.chemins()) {
@@ -301,8 +320,10 @@ public class ConsoleMain {
 		for (int i = 0; i < 3; i++) {
 			System.out.print((i + 1) + " - ");
 			afficherCursus(cartes.get(i));
+			System.out.println();
 		}
 		
+		// Sélection des cartes à défausser
 		String nums;
 		boolean invalide = true;
 		ArrayList<Integer> poubelle = new ArrayList<Integer>();
@@ -327,49 +348,19 @@ public class ConsoleMain {
 		}
 		for (int i = 0; i < 3; i++) {
 			if (poubelle.contains(i)) {
-				m_game.defausserCursus(cartes.get(i));
+				m_game.defausserCursus(cartes.get(i));  // Les cartes sélectionnées sont défaussées
 			} else {
-				joueur.ajouterCursus(cartes.get(i));
+				joueur.ajouterCursus(cartes.get(i));  // Ajoutées à la main du joueur sinon
 			}
 		}
 		return true;
 	}
 	
-	private void nettoyerConsole() {
-		/*System.out.print("\033[H\033[2J");
-		System.out.flush();*/
-	}
-	
-	private void couleurConsole() {
-		//System.out.print("\033[0m");
-	}
-	
-	private void couleurConsole(CouleurJoueur couleur) {
-		/*switch (couleur) {
-			case Rouge: System.out.print("\033[31m"); break;
-			case Vert: System.out.print("\033[32m"); break;
-			case Bleu: System.out.print("\033[34m"); break;
-			case Jaune: System.out.print("\033[33m"); break;
-			case Noir : System.out.print("\033[46;37m]"); break;
-		}*/
-	}
-	
-	private void couleurConsole(Credit credit) {
-		/*switch (credit) {
-			case Humanite: System.out.print("\033[47;30m"); break;
-			case Rouge: System.out.print("\033[41m"); break;
-			case Bleu: System.out.print("\033[44m"); break;
-			case Jaune: System.out.print("\033[43m"); break;
-			case Vert: System.out.print("\033[42m"); break;
-			case Orange: System.out.print("\033[41;33m"); break;
-			case Rose: System.out.print("\033[45m"); break;
-			case Blanc: System.out.print("\033[46;30m"); break;
-			case Noir: System.out.print("\033[1;37m"); break;
-		}*/
-	}
-	
+	/**
+	 * Affiche la couleur d’un crédit sous forme d’un texte
+	 * @param credit Couleur à écrire
+	 */
 	private void afficherCredit(Credit credit) {
-		//couleurConsole(credit);
 		switch (credit) {
 			case Humanite: System.out.print("Huma  "); break;
 			case Rouge: System.out.print("Rouge "); break;
@@ -381,19 +372,22 @@ public class ConsoleMain {
 			case Blanc: System.out.print("Blanc "); break;
 			case Noir: System.out.print("Noir  "); break;
 		}
-		//couleurConsole();
 	}
 	
+	/**
+	 * Afficher une carte cursus sous forme d’un texte
+	 * @param carte Carte crédit à écrire
+	 */
 	private void afficherCursus(Cursus carte) {
 		System.out.print(carte.uv1());
 		System.out.print(" <-> ");
 		System.out.print(carte.uv2());
-		System.out.println("  : (" + carte.valeur() + ")");
+		System.out.print("  : (" + carte.valeur() + ")");
 	}
 	
 	/**
-	 * Méthode temporaire pour le debug
-	 * @param args temporaire
+	 * Point d’entrée de la version console
+	 * @param args Arguments en ligne de commande (ignorés)
 	 */
 	public static void main(String[] args) {
 		scan = new Scanner(System.in);

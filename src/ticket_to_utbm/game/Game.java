@@ -157,7 +157,6 @@ public class Game {
 	*/
 	public void defausserCredit(Credit credit, Joueur joueur)
 	{
-		//point à vérifier : retirerCredits renvoi une liste de cartes Credits 
 		joueur.retirerCredits(credit, 1);
 		m_piocheCredit.defausser(credit);
 	}
@@ -284,6 +283,7 @@ public class Game {
 	 */
 	private int cheminLePlusLong(Joueur joueur) {
 		ArrayList<Chemin> chemins = joueur.chemins();
+		// Ensemble des sommets du graphe (avec seulement les extrémités de chemins appartenant au joueur, pas la peine de faire plus)
 		HashSet<UV> uvs = new HashSet<UV>();
 		for (Chemin chemin : chemins) {
 			uvs.add(chemin.uv1());
@@ -293,11 +293,11 @@ public class Game {
 		int longueurmax = Integer.MIN_VALUE;
 		for (UV source : uvs) {
 			// Pour chaque UV source, on fait un Dijkstra à l’envers
-			// c’est à dire avec -longueur au lieu de +longueur pour tous les chemins
+			// Avec -longueur au lieu de +longueur pour tous les chemins, ça calcule le plus long chemin au lieu du plus court
 			// On a assuré dans Joueur.peutPrendre que le graphe sera acyclique, donc c’est bon
 			LinkedList<UV> file = new LinkedList<UV>();
 			Hashtable<UV, Integer> distances = new Hashtable<UV, Integer>(uvs.size());
-			HashSet<UV> passes = new HashSet<UV>(uvs.size());
+			HashSet<UV> passes = new HashSet<UV>(uvs.size());  // Ensemble des sommets déjà passés
 			
 			file.add(source);
 			distances.put(source, 0);
