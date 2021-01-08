@@ -5,19 +5,14 @@ import javafx.application.Application;
 import java.lang.String;
 
 import javafx.stage.Stage;
-
-import java.io.FileInputStream; 
  
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;  
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 
-public class Window extends Apllication{
+public class Window extends Application{
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -93,4 +88,4 @@ public class Window extends Apllication{
 	}
 }
 
-}
+
