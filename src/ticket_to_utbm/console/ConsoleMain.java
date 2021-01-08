@@ -31,9 +31,12 @@ public class ConsoleMain {
 		m_game = new Game();
 		
 		System.out.println("Ticket to UTBM\n=========================");
-		System.out.print("Nombre de joueurs : ");
-		int nbjoueurs = scan.nextInt();
-		scan.nextLine();
+		int nbjoueurs = -1;
+		while (nbjoueurs < 2 || nbjoueurs > 5) {
+			System.out.print("Nombre de joueurs : ");
+			nbjoueurs = scan.nextInt();
+			scan.nextLine();
+		}
 		for (int i = 0; i < nbjoueurs; i++) {  // Paramétrage des joueurs (nom + couleur)
 			System.out.print("Nom du joueur " + (i + 1) + " : ");
 			String nom = scan.nextLine();
