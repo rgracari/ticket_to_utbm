@@ -1,6 +1,7 @@
 package ticket_to_utbm;
 
 import ticket_to_utbm.console.ConsoleMain;
+import ticket_to_utbm.window.Window;
 
 /**
  * Classe contenant le point d'entrée du programme si l'on souhaite l'exexucter en
@@ -14,6 +15,7 @@ public class Main {
 	 * @param args les arguments passés au programme
 	 */
 	public static void main(String[] args) {
-		ConsoleMain.main(args);
+		//ConsoleMain.main(args);
+		Window.test();
 	}
 }

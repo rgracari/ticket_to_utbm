@@ -9,4 +9,5 @@ module ticket_to_utbm {
 	exports ticket_to_utbm;
 	exports ticket_to_utbm.console;
 	exports ticket_to_utbm.game;
+	exports ticket_to_utbm.window;
 }
